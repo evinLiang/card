@@ -98,19 +98,4 @@ export default {
 	.btns {
 		padding: 0rem 0.24rem 1rem;
 	}
-	.orderDetails ul li {
-		font-size: 15px;
-		text-align: center;
-		display: flex;
-		border-bottom: 1px solid #e7e9f0;
-		line-height: 0.9rem;
-		color: #969696;
-	}
-	.orderDetails ul li.title {
-		border-color: #d5d6da;
-		color: #6c6c6c;
-	}
-	.orderDetails ul li span {
-		flex: 1;
-	}
 </style>
