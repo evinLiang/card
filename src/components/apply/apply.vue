@@ -83,6 +83,20 @@ export default {
 				}
 			}
 		}
+	},
+	created(){
+		// this.$axios.get(this.api.host,{
+		// 	params: {
+		// 		act:"creditCardList",
+		// 		r_type:1,
+		// 		email:"gfds",
+		// 　　		token:"8a6f2805b4515ac12058e79e66539be9"
+		// 　　}
+		// }).then(res=>{
+		// 	console.log(res.data);
+		// }).catch(res=>{
+		// 	console.log(res);
+		// });
 	}
 }
 </script>

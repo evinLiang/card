@@ -5,10 +5,13 @@ import App from './App'
 import router from './router'
 import YDUI from 'vue-ydui'
 import 'vue-ydui/dist/ydui.rem.css'
+import axios from "axios"
+import api from '@/modules/api'	//接口信息
 
 Vue.use(YDUI)
-
 Vue.config.productionTip = false
+Vue.prototype.$axios = axios;
+Vue.prototype.api = api;	//定义api全局变量
 
 router.beforeEach((to, from, next) => {
   /* 路由发生变化修改页面title */
@@ -18,7 +21,6 @@ router.beforeEach((to, from, next) => {
   next();
 })
 
-/* eslint-disable no-new */
 new Vue({
   el: '#app',
   router,

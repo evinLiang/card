@@ -110,6 +110,7 @@ export default {
 		}
 	},
 	created() {
+		console.log(this.$route.params.id);
 		this.$dialog.loading.open('加载中');
 		this.getData();
 	},
