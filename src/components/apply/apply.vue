@@ -1,5 +1,5 @@
 <template>
-	<div class="apply">
+	<div class="apply" v-show="userInfo.token">
 		<yd-cell-group class="pt20">
 			<div class="money-panel">
 				<yd-flexbox>
@@ -16,7 +16,7 @@
             <yd-cell-item>
                 <span slot="left">最迟完成还款日期</span>
                 <span slot="right">
-                	<yd-datetime style="width:inherit; color: #ff7640" type="date" class="datetime" v-model="datetime" slot="right"></yd-datetime>
+                	<yd-datetime style="width:inherit; color: #ff7640" type="date" class="date-time" v-model="applyDate" slot="right" :start-date="applyDate"></yd-datetime>
                 </span>
             </yd-cell-item>
             <yd-cell-item>
@@ -55,14 +55,18 @@
 export default {
 	data() {
 		return {
-			datetime:'2018-08-21',	//最迟完成还款日期
+			applyDate:'2018-08-02',	//最迟完成还款日期
 			money:'',	//还款金额
 			adopt:true, 	//控制"马上申请"按钮是否可以点击
-			maskShow:false
+			maskShow:false,
+			userInfo:{
+				token:'',
+				email:''
+			}
 		};
 	},
 	methods: {
-		applyClick: function(){
+		applyClick() {
 			this.$dialog.loading.open('很快加载好了');
 
             setTimeout(() => {
@@ -71,6 +75,56 @@ export default {
 					name: 'binding'
 				});
             }, 2000);
+		},
+		getUserInfo(){
+
+			//先判断浏览器是否存在token和email的sessionStorage，用于记录用户信息的登录状态
+			if((sessionStorage.getItem('token') == undefined) || (sessionStorage.getItem('email') == undefined) ){
+				
+				//如果sessionStorage没有用户信息，查找路由的token和email的参数
+				if((this.$route.query.token == undefined) || (this.$route.query.email == undefined)){
+
+					//sessionStorage没有用户信息并且路由没有token和email的参数，弹框提示登录失败
+					this.$dialog.loading.close();
+					this.$dialog.confirm({
+	                    title: '温馨提醒',
+	                    mes: '获取用户信息失败,请退出重新登录',
+	                    opts: [
+	                        {
+	                            txt: '确定',
+	                            color: true,
+	                            callback: () => {
+	                                console.log('获取用户信息失败,请退出重新登录');
+	                            }
+	                        }
+	                    ]
+	                });
+				}else {
+
+					//获取路由的token和email的参数保存到sessionStorage，并且组件data.userInfo获取
+					this.userInfo.token = this.$route.query.token;
+					this.userInfo.email = this.$route.query.email;
+					sessionStorage.setItem('token',this.$route.query.token);
+					sessionStorage.setItem('email',this.$route.query.email);
+					this.$dialog.loading.close();
+				}
+
+			}else{
+
+				//sessionStorage存在用户信息，直接组件data.userInfo获取
+				this.userInfo.token = sessionStorage.getItem('token');
+				this.userInfo.email = sessionStorage.getItem('email');
+				this.$dialog.loading.close();
+			}
+		},
+		getDate(){
+			var nowDate = new Date(),
+			y = nowDate.getFullYear(), 
+		    m = nowDate.getMonth() + 1,    
+		    d = nowDate.getDate();  
+		    m = m < 10 ? ('0' + m) : m;
+		    d = d < 10 ? ('0' + d) : d;  
+		    this.applyDate = y+'-'+m+'-'+d
 		}
 	},
 	watch:{
@@ -85,24 +139,15 @@ export default {
 		}
 	},
 	created(){
-		// this.$axios.get(this.api.host,{
-		// 	params: {
-		// 		act:"creditCardList",
-		// 		r_type:1,
-		// 		email:"gfds",
-		// 　　		token:"8a6f2805b4515ac12058e79e66539be9"
-		// 　　}
-		// }).then(res=>{
-		// 	console.log(res.data);
-		// }).catch(res=>{
-		// 	console.log(res);
-		// });
+		this.$dialog.loading.open('加载中');
+		this.getUserInfo();
+		this.getDate();
 	}
 }
 </script>
 
 <style scoped>
-	.datetime:after {
+	.date-time:after {
 		content: ">";
 		margin-left:0.1rem;
 	}

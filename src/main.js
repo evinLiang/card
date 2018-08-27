@@ -7,6 +7,7 @@ import YDUI from 'vue-ydui'
 import 'vue-ydui/dist/ydui.rem.css'
 import axios from "axios"
 import api from '@/modules/api'	//接口信息
+import store from './store'
 
 Vue.use(YDUI)
 Vue.config.productionTip = false
@@ -24,6 +25,7 @@ router.beforeEach((to, from, next) => {
 new Vue({
   el: '#app',
   router,
+  store,//使用store
   components: { App },
   template: '<App/>'
 })

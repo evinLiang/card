@@ -14,7 +14,12 @@ Vue.use(Router)
 export default new Router({
   routes: [
     {
+      //默认第一个是active
       path: '/',
+      redirect: '/apply'
+    },
+    {
+      path: '/apply',
       name: 'apply',
       component: apply,
       meta: {

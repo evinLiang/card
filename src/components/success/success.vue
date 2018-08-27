@@ -32,7 +32,7 @@ export default {
 	methods:{
 		toHome(){
 			this.$router.push({ 
-				name: 'apply'
+				path: 'apply'
 			});
 		}
 	}

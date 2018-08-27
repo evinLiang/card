@@ -1,7 +1,7 @@
 <template>
 	<div class="cards">
 		<div class="cards-list">
-			<div class="item" v-for="item in cards">
+			<div class="item" v-for="(item,index) in cards">
 				<div class="top">
 					<img :src="item.logo3" alt="">
 					<span>招商银行</span>
@@ -18,38 +18,11 @@
 export default {
 	data() {
 		return {
-			cards:[
-				{
-					"card_id": "FEBF08C0-0864-A52A-D1DF-1A0D63531FDE",
-					"name": "广东发展银行",
-					"logo": "http://image.xiaoshushidai.cn/public/bank/15.jpg",
-					"logo2": "http://image.xiaoshushidai.cn/public/bank/new/15.png",
-					"logo3": "http://image.xiaoshushidai.cn/public/bank/icon3/15.png",
-					"logo4": "http://image.xiaoshushidai.cn/public/bank/icon4/15.png",
-					"logo5": "http://image.xiaoshushidai.cn/public/bank/icon5/15.png",
-					"card": "**** **** **** 7839"
-				},
-				{
-					"card_id": "FEBF08C0-0864-A52A-D1DF-1A0D63531FDE",
-					"name": "广东发展银行",
-					"logo": "http://image.xiaoshushidai.cn/public/bank/15.jpg",
-					"logo2": "http://image.xiaoshushidai.cn/public/bank/new/15.png",
-					"logo3": "http://image.xiaoshushidai.cn/public/bank/icon4/15.png",
-					"logo4": "http://image.xiaoshushidai.cn/public/bank/icon4/15.png",
-					"logo5": "http://image.xiaoshushidai.cn/public/bank/icon3/15.png",
-					"card": "**** **** **** 7839"
-				},
-				{
-					"card_id": "FEBF08C0-0864-A52A-D1DF-1A0D63531FDE",
-					"name": "广东发展银行",
-					"logo": "http://image.xiaoshushidai.cn/public/bank/15.jpg",
-					"logo2": "http://image.xiaoshushidai.cn/public/bank/new/15.png",
-					"logo3": "http://image.xiaoshushidai.cn/public/bank/icon5/15.png",
-					"logo4": "http://image.xiaoshushidai.cn/public/bank/icon4/15.png",
-					"logo5": "http://image.xiaoshushidai.cn/public/bank/icon3/15.png",
-					"card": "**** **** **** 7839"
-				}
-			]
+			cards:'',
+			userInfo:{
+				token:sessionStorage.getItem('token'),
+				email:sessionStorage.getItem('email')
+			}
 		};
 	},
 	methods:{
@@ -57,7 +30,31 @@ export default {
 			this.$router.push({ 
 				name: 'binding'
 			});
+		},
+		getDate(){
+			var _this = this;
+			_this.$axios.get(_this.api.server,{
+				params: {
+					act : _this.api.act.cards,
+					r_type : 1,
+					email : _this.userInfo.email,
+			　　		token : _this.userInfo.token
+			　　}
+			}).then(res=>{
+				console.table(res.data);
+				if(res.status==200){
+					_this.cards = res.data;
+					_this.listStatus = 1;
+					_this.$dialog.loading.close();
+				}
+			}).catch(res=>{
+				console.log(res);
+			});
 		}
+	},
+	created(){
+		this.$dialog.loading.open('加载中');
+		this.getDate();
 	}
 }
 </script>

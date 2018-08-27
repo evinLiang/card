@@ -38,62 +38,11 @@ export default {
 	data() {
 		return {
 			listStatus:-1,
-			recordList:{
-                    "A7EBDA6D-F1E1-E389-75D4-0E395D11E82D": {
-                        "amount": "6000.00",
-                        "fee": "5160.01",
-                        "compAmount": "606.58",
-                        "compFee": "5.16",
-                        "order_id": "A7EBDA6D-F1E1-E389-75D4-0E395D11E82D",
-                        "status": "中止",
-                        "apply_date": "2018-08-17 14:22:36",
-                        "bankInfo": {
-                            "name": "广东发展银行",
-                            "card": "**** **** **** 7839"
-                        },
-                        "logo": "http://image.xiaoshushidai.cn/public/bank/15.jpg",
-                        "logo2": "http://image.xiaoshushidai.cn/public/bank/new/15.png",
-                        "logo3": "http://image.xiaoshushidai.cn/public/bank/icon3/15.png",
-                        "logo4": "http://image.xiaoshushidai.cn/public/bank/icon4/15.png",
-                        "logo5": "http://image.xiaoshushidai.cn/public/bank/icon5/15.png"
-                    },
-                    "0FE1AC25-261C-56DD-1B63-FB8A3C5088C1": {
-                        "amount": "6000.00",
-                        "fee": "42.01",
-                        "compAmount": "0.00",
-                        "compFee": "0.00",
-                        "order_id": "0FE1AC25-261C-56DD-1B63-FB8A3C5088C1",
-                        "status": "处理中",
-                        "apply_date": "2018-08-17 10:48:09",
-                        "bankInfo": {
-                            "name": "广东发展银行",
-                            "card": "**** **** **** 7839"
-                        },
-                        "logo": "http://image.xiaoshushidai.cn/public/bank/15.jpg",
-                        "logo2": "http://image.xiaoshushidai.cn/public/bank/new/15.png",
-                        "logo3": "http://image.xiaoshushidai.cn/public/bank/icon3/15.png",
-                        "logo4": "http://image.xiaoshushidai.cn/public/bank/icon4/15.png",
-                        "logo5": "http://image.xiaoshushidai.cn/public/bank/icon5/15.png"
-                    },
-                    "A5613B48-A064-E3D6-64FB-453C71246325": {
-                        "amount": "10000.00",//代偿金额
-                        "fee": "91.00",//服务费
-                        "compAmount": 675.84,////已完成金额
-                        "compFee": 6.06,//已完成手续费
-                        "status": "失败",
-                        "order_id": "A5613B48-A064-E3D6-64FB-453C71246325",
-                        "apply_date": "2018-08-16 17:37:17",
-                        "bankInfo": {
-                            "name": "广东发展银行",
-                            "card": "**** **** **** 7839"
-                        },
-                        "logo": "http://image.xiaoshushidai.cn/public/bank/15.jpg",
-                        "logo2": "http://image.xiaoshushidai.cn/public/bank/new/15.png",
-                        "logo3": "http://image.xiaoshushidai.cn/public/bank/icon3/15.png",
-                        "logo4": "http://image.xiaoshushidai.cn/public/bank/icon4/15.png",
-                        "logo5": "http://image.xiaoshushidai.cn/public/bank/icon5/15.png"
-                    }
-                },
+			recordList:'',
+            userInfo:{
+				token:sessionStorage.getItem('token'),
+				email:sessionStorage.getItem('email')
+			}
 		};
 	},
 	methods:{
@@ -105,12 +54,27 @@ export default {
 			});
 		},
 		getData: function(){
-			this.listStatus = 1;
-			this.$dialog.loading.close();	
+			var _this = this;
+			_this.$axios.get(_this.api.server,{
+				params: {
+					act : _this.api.act.record,
+					r_type : 1,
+					email : _this.userInfo.email,
+			　　		token : _this.userInfo.token
+			　　}
+			}).then(res=>{
+				if(res.status==200){
+					_this.recordList = res.data.data;
+					_this.listStatus = 1;
+					_this.$dialog.loading.close();
+				}
+			}).catch(res=>{
+				console.log(res);
+			});
+	
 		}
 	},
 	created() {
-		console.log(this.$route.params.id);
 		this.$dialog.loading.open('加载中');
 		this.getData();
 	},
