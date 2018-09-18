@@ -1,13 +1,13 @@
 <template>
 	<div class="cards">
 		<div class="cards-list">
-			<div class="item" v-for="(item,index) in cards">
+			<div class="item" v-for="(item,index) in cards.card_list">
 				<div class="top">
-					<img :src="item.logo3" alt="">
-					<span>招商银行</span>
+					<img :src="item.logo5" alt="">
+					<span>{{item.name}}</span>
 				</div>
 				<p class="card-num"><span>{{item.card}}</span></p>
-				<div class="choice-btn">选择</div>
+				<div class="choice-btn" @click="activeCards(index)">选择</div>
 			</div>
 		</div>
 		<div class="addCard" @click="add()">+ 添加信用卡</div>
@@ -31,17 +31,16 @@ export default {
 				name: 'binding'
 			});
 		},
-		getDate(){
+		getData(){
 			var _this = this;
 			_this.$axios.get(_this.api.server,{
 				params: {
-					act : _this.api.act.cards,
+					act : _this.api.act.cardList,
 					r_type : 1,
 					email : _this.userInfo.email,
 			　　		token : _this.userInfo.token
 			　　}
 			}).then(res=>{
-				console.table(res.data);
 				if(res.status==200){
 					_this.cards = res.data;
 					_this.listStatus = 1;
@@ -50,11 +49,16 @@ export default {
 			}).catch(res=>{
 				console.log(res);
 			});
+		},
+		activeCards(index){
+
+			//选择卡
+			console.log(this.cards.card_list[index].card_id);
 		}
 	},
 	created(){
 		this.$dialog.loading.open('加载中');
-		this.getDate();
+		this.getData();							//获取信用卡列表数据
 	}
 }
 </script>

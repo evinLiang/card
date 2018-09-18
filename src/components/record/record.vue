@@ -57,21 +57,23 @@ export default {
 			var _this = this;
 			_this.$axios.get(_this.api.server,{
 				params: {
-					act : _this.api.act.record,
-					r_type : 1,
-					email : _this.userInfo.email,
+					act: _this.api.act.orderList,
+					r_type: 1,
+			　　		email : _this.userInfo.email,
 			　　		token : _this.userInfo.token
 			　　}
 			}).then(res=>{
+				console.log(res);
 				if(res.status==200){
 					_this.recordList = res.data.data;
 					_this.listStatus = 1;
 					_this.$dialog.loading.close();
+				}else {
+					console.log("请求出错");
 				}
 			}).catch(res=>{
 				console.log(res);
 			});
-	
 		}
 	},
 	created() {

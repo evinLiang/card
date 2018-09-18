@@ -16,20 +16,20 @@
             <yd-cell-item>
                 <span slot="left">最迟完成还款日期</span>
                 <span slot="right">
-                	<yd-datetime style="width:inherit; color: #ff7640" type="date" class="date-time" v-model="applyDate" slot="right" :start-date="applyDate"></yd-datetime>
+                	<yd-datetime style="width:inherit; color: #ff7640" type="date" class="date-time" v-model="finishDate" slot="right" :start-date="startDate" :end-date="endDate" :callback="prePlan(prePlanSwitch)"></yd-datetime>
                 </span>
             </yd-cell-item>
             <yd-cell-item>
                 <span slot="left">要求卡内最小可用额度</span>
-                <span slot="right">1000.00元</span>
+                <span slot="right">{{smallQuota}}元</span>
             </yd-cell-item>
             <yd-cell-item>
                 <span slot="left">预计到账次数</span>
-                <span slot="right">10次</span>
+                <span slot="right">{{frequency}}次</span>
             </yd-cell-item>
             <yd-cell-item>
                 <span slot="left">服务费</span>
-                <span slot="right">1元</span>
+                <span slot="right">{{serviceCharge}}元</span>
             </yd-cell-item>
             <yd-cell-item>
                 <span slot="left" class="cell-small-text c-ff7640">常见问题</span>
@@ -55,11 +55,17 @@
 export default {
 	data() {
 		return {
-			applyDate:'2018-08-02',	//最迟完成还款日期
-			money:'',	//还款金额
-			adopt:true, 	//控制"马上申请"按钮是否可以点击
-			maskShow:false,
-			userInfo:{
+			startDate: '2020-1-1',	  //开始时间
+			endDate: '2020-1-1',	  //结束时间
+			finishDate: '2020-1-1',	  //完成时间
+			money: '',				  //还款金额
+			adopt: true, 			  //控制"马上申请"按钮是否可以点击
+			maskShow: false,		  //控制遮罩层显示
+			smallQuota: '--',		  //要求卡内最小可用额度
+			frequency: '--',		  //预计到账次数
+			serviceCharge: '--',	  //服务费
+			prePlanSwitch: false,	  //控制ydui时间组件第一次不要请求
+			userInfo: {				  //用户信息
 				token:'',
 				email:''
 			}
@@ -67,24 +73,71 @@ export default {
 	},
 	methods: {
 		applyClick() {
-			this.$dialog.loading.open('很快加载好了');
 
-            setTimeout(() => {
-                this.$dialog.loading.close();
-                this.$router.push({ 
-					name: 'binding'
-				});
-            }, 2000);
+			//点击"马山申请"按钮,检验
+			var _this = this;
+			_this.$dialog.loading.open('很快加载好了');
+			_this.$axios.get(_this.api.server,{
+				params: {
+					act : _this.api.act.userQuery,
+					r_type : 1,
+					email : _this.userInfo.email,
+			　　		token : _this.userInfo.token
+			　　}
+			}).then(res=>{
+				this.$dialog.loading.close();
+				if(res.data.response_code == 1){
+
+					//保存用户姓名和身份证到sessionStorage
+					sessionStorage.setItem('name',res.data.name);
+					sessionStorage.setItem('idNo',res.data.idNo);
+
+					//已实名并且绑定信用卡则跳转信用卡列表
+					this.$router.push({ 
+						name: 'cards'
+					});
+				}else {
+					if(res.data.userAuth == 0){
+
+						//没有实名认证，跳转到实名认证页面
+						this.$router.push({ 
+							name: 'cards'
+						});
+					}
+					if(res.data.bindCard == 0){
+
+						//没有绑定信用卡，跳转到绑定信用卡页面
+						this.$router.push({ 
+							name: 'binding'
+						});
+					}
+				}
+			}).catch(res=>{
+				this.$dialog.loading.close();
+				_this.$dialog.confirm({
+                    title: '温馨提醒',
+                    mes: '出错了,请重新申请',
+                    opts: [
+                        {
+                            txt: '确定',
+                            color: true,
+                            callback: () => {
+                                _this.applyClick();
+                            }
+                        }
+                    ]
+                });
+			});
 		},
 		getUserInfo(){
 
-			//先判断浏览器是否存在token和email的sessionStorage，用于记录用户信息的登录状态
+			//先判断浏览器是否存在token和email的sessionStorage，(用于记录用户信息的登录状态)
 			if((sessionStorage.getItem('token') == undefined) || (sessionStorage.getItem('email') == undefined) ){
 				
 				//如果sessionStorage没有用户信息，查找路由的token和email的参数
 				if((this.$route.query.token == undefined) || (this.$route.query.email == undefined)){
 
-					//sessionStorage没有用户信息并且路由没有token和email的参数，弹框提示登录失败
+					//路由没有token和email的参数，弹框提示登录失败
 					this.$dialog.loading.close();
 					this.$dialog.confirm({
 	                    title: '温馨提醒',
@@ -101,47 +154,122 @@ export default {
 	                });
 				}else {
 
-					//获取路由的token和email的参数保存到sessionStorage，并且组件data.userInfo获取
+					//获取路由的token和email的参数保存到sessionStorage，并且this.userInfo赋值
 					this.userInfo.token = this.$route.query.token;
 					this.userInfo.email = this.$route.query.email;
 					sessionStorage.setItem('token',this.$route.query.token);
 					sessionStorage.setItem('email',this.$route.query.email);
-					this.$dialog.loading.close();
+					this.register();	//获取用户信息后，进行龙代还登记
 				}
 
 			}else{
 
-				//sessionStorage存在用户信息，直接组件data.userInfo获取
+				//sessionStorage存在用户信息，this.userInfo赋值
 				this.userInfo.token = sessionStorage.getItem('token');
 				this.userInfo.email = sessionStorage.getItem('email');
-				this.$dialog.loading.close();
+				this.register();	//获取用户信息后，进行龙代还登记
 			}
 		},
 		getDate(){
-			var nowDate = new Date(),
-			y = nowDate.getFullYear(), 
-		    m = nowDate.getMonth() + 1,    
-		    d = nowDate.getDate();  
-		    m = m < 10 ? ('0' + m) : m;
-		    d = d < 10 ? ('0' + d) : d;  
-		    this.applyDate = y+'-'+m+'-'+d
+
+			//开始时间
+			var startDate = new Date();
+			var stratY = startDate.getFullYear(); 
+			var stratM = startDate.getMonth() + 1;
+			var startD = startDate.getDate();
+			stratM = stratM < 10 ? ('0' + stratM) : stratM;
+		    startD = startD < 10 ? ('0' + startD) : startD; 
+		    this.startDate = stratY+'-'+stratM+'-'+startD;
+
+		    //结束时间，为开始时间+14天
+		    var endDate = new Date();
+		    endDate.setDate(endDate.getDate() + 14);
+		    var endY = endDate.getFullYear(); 
+			var endM = endDate.getMonth() + 1;
+			var endD = endDate.getDate();
+			endM = endM < 10 ? ('0' + endM) : endM;
+		    endD = endD < 10 ? ('0' + endD) : endD; 
+		    this.endDate = endY+'-'+endM+'-'+endD;
+		    this.finishDate = endY+'-'+endM+'-'+endD;
+		},
+		prePlan(){
+
+			//预览预约计划
+			var _this = this;
+			if(_this.prePlanSwitch == false){
+				return;
+			}
+			_this.$axios.get(_this.api.server,{
+				params: {
+					act : _this.api.act.prePlan,
+					r_type : 1,
+					email : _this.userInfo.email,
+					amount : _this.money,
+			　　		token : _this.userInfo.token,
+					endDate : _this.finishDate
+			　　}
+			}).then(res=>{
+				if(res.status==200){
+					_this.adopt = false;
+					_this.smallQuota = res.data.firstAmt;
+					_this.frequency = res.data.number;
+					_this.serviceCharge = res.data.fee;
+				}
+			}).catch(res=>{
+				console.log(res);
+			});
+		},
+		register(){
+
+			//龙代还登记
+			var _this = this;
+			_this.$axios.get(_this.api.server,{
+				params: {
+					act : _this.api.act.register,
+					r_type : 1,
+					email : _this.userInfo.email,
+			　　		token : _this.userInfo.token
+			　　}
+			}).then(res=>{
+				_this.$dialog.loading.close();
+				//console.table(res.data);
+			}).catch(res=>{
+				_this.$dialog.confirm({
+                    title: '温馨提醒',
+                    mes: '出错了,请重新申请',
+                    opts: [
+                        {
+                            txt: '确定',
+                            color: true,
+                            callback: () => {
+                                _this.register();
+                            }
+                        }
+                    ]
+                });
+			});
 		}
 	},
 	watch:{
 		money:{
 			handler(newValue,oldValue){
 				if(newValue >= 500){
-					this.adopt = false
+					this.prePlanSwitch = true
+					this.prePlan()		//预览预约计划
 				}else {
-					this.adopt = true
+					this.prePlanSwitch = false;
+					this.adopt = true;
+					this.smallQuota = '--';
+					this.frequency = '--';
+					this.serviceCharge = '--';
 				}
 			}
 		}
 	},
 	created(){
 		this.$dialog.loading.open('加载中');
-		this.getUserInfo();
-		this.getDate();
+		this.getUserInfo();						//获取用户信息
+		this.getDate();							//获取完成还款时间
 	}
 }
 </script>

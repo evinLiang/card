@@ -3,11 +3,11 @@
 		<yd-cell-group class="pt20">
             <yd-cell-item>
                 <span slot="left">持卡人姓名</span>
-                <span slot="right">小黄</span>
+                <span slot="right">{{userInfo.name}}</span>
             </yd-cell-item>
             <yd-cell-item>
                 <span slot="left">身份证号</span>
-                <span slot="right">4409800000000000</span>
+                <span slot="right">{{userInfo.idNo}}</span>
             </yd-cell-item>
             <yd-cell-item>
 	            <span slot="left">银行卡号：</span>
@@ -51,7 +51,13 @@ export default {
 			mobile:'',
 			finitePeriod:'',
 			CVV2:'',
-			maskShow:false
+			maskShow:false,
+            userInfo:{
+                token:sessionStorage.getItem('token'),
+                email:sessionStorage.getItem('email'),
+                name:sessionStorage.getItem('name'),
+                idNo:sessionStorage.getItem('idNo')
+            }
 		};
 	},
 	methods:{
