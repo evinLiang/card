@@ -28,7 +28,7 @@
 				<img src="./box.png" alt="">
 				<p class="text">您当前暂无申请记录</p>
 			</div>
-			<button type="button" class="mt70 yd-btn-block yd-btn-theme"><span>马上申请</span></button>
+			<button type="button" class="mt70 yd-btn-block yd-btn-theme" @click="toApply"><span>马上申请</span></button>
 		</div>
 	</div>
 </template>
@@ -63,16 +63,29 @@ export default {
 			　　		token : _this.userInfo.token
 			　　}
 			}).then(res=>{
-				console.log(res);
+				//console.log(res.data);
 				if(res.status==200){
-					_this.recordList = res.data.data;
-					_this.listStatus = 1;
-					_this.$dialog.loading.close();
+					if(res.data.response_code == 0){
+						_this.listStatus = 0;
+						_this.$dialog.loading.close();
+					}else {
+						_this.recordList = res.data.data;
+						_this.listStatus = 1;
+						_this.$dialog.loading.close();
+					}
+				
 				}else {
 					console.log("请求出错");
 				}
 			}).catch(res=>{
 				console.log(res);
+			});
+		},
+		toApply(){
+
+			//跳转到申请页
+			this.$router.push({ 
+				name: 'apply'
 			});
 		}
 	},

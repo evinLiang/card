@@ -52,12 +52,42 @@ export default {
 		},
 		activeCards(index){
 
-			//选择卡
-			console.log(this.cards.card_list[index].card_id);
+			//更改plan的vuex
+			var _this = this;
+			_this.$store.commit('changeCard',{
+				card_id: _this.cards.card_list[index].card_id
+			});
+			//选择银行卡后跳转到submit页面
+			this.$router.push({ 
+				name: 'submit'
+			});
+		},
+		checkData(){
+
+			//检查vuex的计划数据是否为空
+			var _this = this;
+			if((_this.$store.state.plan.amount == '') && (_this.$store.state.plan.endDate == '')){
+				_this.$dialog.confirm({
+                    title: '温馨提醒',
+                    mes: '信用卡还款金额不能为空',
+                    opts: [
+                        {
+                            txt: '确定',
+                            color: true,
+                            callback: () => {
+                                this.$router.push({ 
+                                    name: 'apply'
+                                });
+                            }
+                        }
+                    ]
+                });
+			}
 		}
 	},
 	created(){
 		this.$dialog.loading.open('加载中');
+		this.checkData();
 		this.getData();							//获取信用卡列表数据
 	}
 }

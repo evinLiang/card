@@ -7,6 +7,7 @@ import success from '@/components/success/success'
 import binding from '@/components/binding/binding'
 import submit from '@/components/submit/submit'
 import cards from '@/components/cards/cards'
+import realName from '@/components/realName/realName'
 import plan from '@/components/plan/plan'
 
 Vue.use(Router)
@@ -72,6 +73,14 @@ export default new Router({
       component: cards,
       meta: {
         title: '信用卡列表'
+      }
+    },
+    {
+      path: '/realName',
+      name: 'realName',
+      component: realName,
+      meta: {
+        title: '实名认证'
       }
     },
     {

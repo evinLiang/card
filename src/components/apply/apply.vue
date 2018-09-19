@@ -1,5 +1,5 @@
 <template>
-	<div class="apply" v-show="userInfo.token">
+	<div class="apply" v-show="login">
 		<yd-cell-group class="pt20">
 			<div class="money-panel">
 				<yd-flexbox>
@@ -16,7 +16,7 @@
             <yd-cell-item>
                 <span slot="left">最迟完成还款日期</span>
                 <span slot="right">
-                	<yd-datetime style="width:inherit; color: #ff7640" type="date" class="date-time" v-model="finishDate" slot="right" :start-date="startDate" :end-date="endDate" :callback="prePlan(prePlanSwitch)"></yd-datetime>
+                	<yd-datetime style="width:inherit; color: #ff7640" type="date" class="date-time" v-model="finishDate" slot="right" :start-date="startDate" :end-date="endDate"></yd-datetime>
                 </span>
             </yd-cell-item>
             <yd-cell-item>
@@ -55,20 +55,22 @@
 export default {
 	data() {
 		return {
-			startDate: '2020-1-1',	  //开始时间
-			endDate: '2020-1-1',	  //结束时间
-			finishDate: '2020-1-1',	  //完成时间
+			startDate: '',	  		  //开始时间
+			endDate: '',	  		  //结束时间
+			finishDate: '',	  		  //完成时间
 			money: '',				  //还款金额
 			adopt: true, 			  //控制"马上申请"按钮是否可以点击
 			maskShow: false,		  //控制遮罩层显示
 			smallQuota: '--',		  //要求卡内最小可用额度
 			frequency: '--',		  //预计到账次数
 			serviceCharge: '--',	  //服务费
-			prePlanSwitch: false,	  //控制ydui时间组件第一次不要请求
 			userInfo: {				  //用户信息
 				token:'',
 				email:''
-			}
+			},
+			login:false,
+			msg: '',
+			prePlanSwith:false
 		};
 	},
 	methods: {
@@ -85,6 +87,8 @@ export default {
 			　　		token : _this.userInfo.token
 			　　}
 			}).then(res=>{
+				console.table(res.data);
+				return;
 				this.$dialog.loading.close();
 				if(res.data.response_code == 1){
 
@@ -101,7 +105,7 @@ export default {
 
 						//没有实名认证，跳转到实名认证页面
 						this.$router.push({ 
-							name: 'cards'
+							name: 'realName'
 						});
 					}
 					if(res.data.bindCard == 0){
@@ -152,6 +156,7 @@ export default {
 	                        }
 	                    ]
 	                });
+	                return;
 				}else {
 
 					//获取路由的token和email的参数保存到sessionStorage，并且this.userInfo赋值
@@ -194,11 +199,17 @@ export default {
 		},
 		prePlan(){
 
-			//预览预约计划
 			var _this = this;
-			if(_this.prePlanSwitch == false){
+			if(_this.prePlanSwith == false){
 				return;
 			}
+			//更改plan的vuex
+			_this.$store.commit('changePlan',{
+				cAmount: _this.money,
+				cEndDate: _this.finishDate
+			});
+
+			//预览预约计划
 			_this.$axios.get(_this.api.server,{
 				params: {
 					act : _this.api.act.prePlan,
@@ -209,6 +220,7 @@ export default {
 					endDate : _this.finishDate
 			　　}
 			}).then(res=>{
+				//console.log(res.data);
 				if(res.status==200){
 					_this.adopt = false;
 					_this.smallQuota = res.data.firstAmt;
@@ -232,11 +244,29 @@ export default {
 			　　}
 			}).then(res=>{
 				_this.$dialog.loading.close();
-				//console.table(res.data);
+				if(res.data.response_code !== 1){
+					this.$dialog.confirm({
+	                    title: '温馨提醒',
+	                    mes: '用户还没有登记,请退出重新登录',
+	                    opts: [
+	                        {
+	                            txt: '确定',
+	                            color: true,
+	                            callback: () => {
+	                                console.log('用户还没有登记,请退出重新登录');
+	                            }
+	                        }
+	                    ]
+	                });
+	                return;
+				}else {
+					_this.login = true;
+				}
 			}).catch(res=>{
+				_this.$dialog.loading.close();
 				_this.$dialog.confirm({
                     title: '温馨提醒',
-                    mes: '出错了,请重新申请',
+                    mes: '用户还没有登记,请退出重新登录',
                     opts: [
                         {
                             txt: '确定',
@@ -254,14 +284,21 @@ export default {
 		money:{
 			handler(newValue,oldValue){
 				if(newValue >= 500){
-					this.prePlanSwitch = true
-					this.prePlan()		//预览预约计划
+					this.prePlanSwith = true;
+					this.prePlan();
 				}else {
-					this.prePlanSwitch = false;
+					this.prePlanSwith = false;
 					this.adopt = true;
 					this.smallQuota = '--';
 					this.frequency = '--';
 					this.serviceCharge = '--';
+				}
+			}
+		},
+		finishDate:{
+			handler(newValue,oldValue){
+				if(oldValue !== ''){
+					this.prePlan();
 				}
 			}
 		}

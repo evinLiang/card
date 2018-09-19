@@ -6,37 +6,37 @@
 		            <yd-flexbox-item>
 		            	<h3 class="font-20p">信用卡还款金额(元)</h3>
 		            </yd-flexbox-item>
-		            <div class="c-ff7640">代偿计划 ></div>
+		            <div class="c-ff7640" @click="orderPlan">代偿计划 ></div>
 		        </yd-flexbox>
-		        <div class="m-input">{{money}}</div>
+		        <div class="m-input">{{$store.state.plan.amount}}</div>
                 <div class="apply-info">
                     <p><span class="left">开始时间</span><span class="line c-fff">——</span><span class="flex1">结束时间</span><span>手续费</span></p>
-                    <p><span class="left">08月08日</span><span class="line">——</span><span class="flex1">08月18日</span><span>￥35.00</span></p>
+                    <p><span class="left" v-text="preOrderData.start_date_format"></span><span class="line">——</span><span class="flex1" v-text="preOrderData.end_date_format"></span><span>￥{{preOrderData.fee}}</span></p>
                 </div>
 			</div>
 		</yd-cell-group>
 		<yd-cell-group class="mt20">
             <yd-cell-item>
                 <span slot="left">代偿信用卡</span>
-                <span slot="right">尾数7839（广发银行 信用卡）</span>
+                <span slot="right" v-text="preOrderData.credit_card"></span>
             </yd-cell-item>
             <yd-cell-item>
                 <span slot="left">持卡人</span>
-                <span slot="right">张伯伦</span>
+                <span slot="right" v-text="preOrderData.real_name"></span>
             </yd-cell-item>
             <yd-cell-item>
                 <span slot="left">CVV2</span>
-                <span slot="right">387</span>
+                <span slot="right" v-text="preOrderData.cvv2">387</span>
             </yd-cell-item>
         </yd-cell-group>
         <yd-cell-group class="mt20">
             <yd-cell-item>
                 <span slot="left">预留手机号</span>
-                <span slot="right">13412345678</span>
+                <span slot="right" v-text="preOrderData.mobile"></span>
             </yd-cell-item>
             <yd-cell-item>
 	            <yd-icon slot="icon" name="phone3" size=".45rem"></yd-icon>
-	            <input type="text" slot="right" placeholder="请输入短信验证码">
+	            <input type="text" slot="right" placeholder="请输入短信验证码" v-model="sendCode">
 	            <yd-sendcode slot="right" 
 	                         v-model="start1" 
 	                         @click.native="sendCode1" 
@@ -58,40 +58,112 @@
 export default {
 	data() {
 		return {
-			money:'5000.00',
 			start1: false,
-			agreement:false
+			agreement:false,
+            userInfo:{
+                token:sessionStorage.getItem('token'),
+                email:sessionStorage.getItem('email')
+            },
+            preOrderData:'',
+            sendCode:''
 		};
 	},
 	methods: {
-            sendCode1() {
-                this.$dialog.loading.open('发送中...');
-                setTimeout(() => {
+        sendCode1() {
+            this.$dialog.loading.open('发送中...');
+            setTimeout(() => {
 
-                    this.start1 = true;
-                    this.$dialog.loading.close();
+                this.start1 = true;
+                this.$dialog.loading.close();
 
-                    this.$dialog.toast({
-                        mes: '已发送',
-                        icon: 'success',
-                        timeout: 1500
-                    });
+                this.$dialog.toast({
+                    mes: '已发送',
+                    icon: 'success',
+                    timeout: 1500
+                });
 
-                }, 1000);
-            },
-            toSuccess(){
-            	if(this.agreement==true){
-            		this.$router.push({ 
-						name: 'success'
-					});
-            	}else {
-            		this.$dialog.toast({
-	                    mes: '请先同意协议内容',
-	                    timeout: 1500
-	                });
-            	}
+            }, 1000);
+        },
+        toSuccess(){
+            if(this.sendCode == ''){
+               this.$dialog.toast({
+                    mes: '手机验证码不能为空',
+                    timeout: 1500
+                });
+                return; 
             }
+        	if((this.agreement==false)){
+        		this.$dialog.toast({
+                    mes: '请先同意协议内容',
+                    timeout: 1500
+                });
+                return;
+        	}else {
+                this.$router.push({ 
+                    name: 'success'
+                });
+        	}
+        },
+        preOrder(){
+
+            //订单预览
+            var _this = this;
+            _this.$axios.get(_this.api.server,{
+                params: {
+                act: _this.api.act.preOrde,
+                r_type: 1,
+                email: _this.userInfo.email,
+                token: _this.userInfo.token,
+                amount: _this.$store.state.plan.amount,
+                endDate: _this.$store.state.plan.endDate,
+                card_id: _this.$store.state.card.card_id
+            　　}
+            }).then(res=>{
+                console.table(res.data);
+                if(res.status==200){
+                    _this.preOrderData = res.data;
+                    this.$dialog.loading.close();
+                }
+            }).catch(res=>{
+                _this.preOrder();
+            });
+        },
+        checkData(){
+
+            //检查vuex的银行卡或者计划数据是否为空
+            var _this = this;
+            if((_this.$store.state.plan.amount == '') && (_this.$store.state.plan.endDate == '') && (_this.$store.state.card.card_id == '')){
+                _this.$dialog.confirm({
+                    title: '温馨提醒',
+                    mes: '信用卡还款金额不能为空',
+                    opts: [
+                        {
+                            txt: '确定',
+                            color: true,
+                            callback: () => {
+                                this.$router.push({ 
+                                    name: 'apply'
+                                });
+                            }
+                        }
+                    ]
+                });
+            }
+        },
+        orderPlan(){
+
+            //代偿计划
+            this.$router.push({ 
+                name: 'plan',
+                params: { order_id: this.preOrderData.order_id } 
+            });
         }
+    },
+    created(){
+        this.$dialog.loading.open('请求中...');
+        this.checkData();
+        this.preOrder();
+    }
 }
 </script>
 
