@@ -119,7 +119,7 @@ export default {
                 card_id: _this.$store.state.card.card_id
             　　}
             }).then(res=>{
-                console.table(res.data);
+                //console.table(res);
                 if(res.status==200){
                     _this.preOrderData = res.data;
                     this.$dialog.loading.close();
@@ -132,22 +132,13 @@ export default {
 
             //检查vuex的银行卡或者计划数据是否为空
             var _this = this;
-            if((_this.$store.state.plan.amount == '') && (_this.$store.state.plan.endDate == '') && (_this.$store.state.card.card_id == '')){
-                _this.$dialog.confirm({
-                    title: '温馨提醒',
-                    mes: '信用卡还款金额不能为空',
-                    opts: [
-                        {
-                            txt: '确定',
-                            color: true,
-                            callback: () => {
-                                this.$router.push({ 
-                                    name: 'apply'
-                                });
-                            }
-                        }
-                    ]
+            if((_this.$store.state.card.card_id == "") || (_this.$store.state.plan.amount == "") || (_this.$store.state.plan.endDate == "")){
+                _this.$router.push({ 
+                    name: 'apply'
                 });
+                return;
+            }else {
+                _this.preOrder();
             }
         },
         orderPlan(){
@@ -162,7 +153,6 @@ export default {
     created(){
         this.$dialog.loading.open('请求中...');
         this.checkData();
-        this.preOrder();
     }
 }
 </script>

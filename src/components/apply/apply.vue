@@ -76,9 +76,9 @@ export default {
 	methods: {
 		applyClick() {
 
-			//点击"马山申请"按钮,检验
+			//点击"马上申请"按钮,查询用户信息
 			var _this = this;
-			_this.$dialog.loading.open('很快加载好了');
+			_this.$dialog.loading.open('请求中');
 			_this.$axios.get(_this.api.server,{
 				params: {
 					act : _this.api.act.userQuery,
@@ -87,49 +87,42 @@ export default {
 			　　		token : _this.userInfo.token
 			　　}
 			}).then(res=>{
-				console.table(res.data);
-				return;
+				//console.table(res.data);
 				this.$dialog.loading.close();
-				if(res.data.response_code == 1){
+				if(res.data.userAuth == 0){
 
-					//保存用户姓名和身份证到sessionStorage
-					sessionStorage.setItem('name',res.data.name);
-					sessionStorage.setItem('idNo',res.data.idNo);
+					//没有实名认证，跳转到实名认证页面
+					this.$router.push({ 
+						name: 'realName'
+					});
+					return;
+				}else {
+
+					//已实名,保存用户姓名和身份证到sessionStorage
+					sessionStorage.setItem('name',res.data.real_name);
+					sessionStorage.setItem('idNo',res.data.id_no);
+				}
+
+				if(res.data.bindCard == 0){
+
+					//没有绑定信用卡，跳转到绑定信用卡页面
+					this.$router.push({ 
+						name: 'binding'
+					});
+					return;
+				}else {
 
 					//已实名并且绑定信用卡则跳转信用卡列表
 					this.$router.push({ 
 						name: 'cards'
 					});
-				}else {
-					if(res.data.userAuth == 0){
-
-						//没有实名认证，跳转到实名认证页面
-						this.$router.push({ 
-							name: 'realName'
-						});
-					}
-					if(res.data.bindCard == 0){
-
-						//没有绑定信用卡，跳转到绑定信用卡页面
-						this.$router.push({ 
-							name: 'binding'
-						});
-					}
 				}
 			}).catch(res=>{
 				this.$dialog.loading.close();
-				_this.$dialog.confirm({
-                    title: '温馨提醒',
-                    mes: '出错了,请重新申请',
-                    opts: [
-                        {
-                            txt: '确定',
-                            color: true,
-                            callback: () => {
-                                _this.applyClick();
-                            }
-                        }
-                    ]
+				_this.$dialog.toast({
+                    mes: '请求接口超时',
+                    timeout: 2000,
+                    icon: 'error'
                 });
 			});
 		},
@@ -164,7 +157,9 @@ export default {
 					this.userInfo.email = this.$route.query.email;
 					sessionStorage.setItem('token',this.$route.query.token);
 					sessionStorage.setItem('email',this.$route.query.email);
-					this.register();	//获取用户信息后，进行龙代还登记
+					//this.register();	//获取用户信息后，进行龙代还登记
+					this.$dialog.loading.close();
+					this.login = true;
 				}
 
 			}else{
@@ -172,7 +167,9 @@ export default {
 				//sessionStorage存在用户信息，this.userInfo赋值
 				this.userInfo.token = sessionStorage.getItem('token');
 				this.userInfo.email = sessionStorage.getItem('email');
-				this.register();	//获取用户信息后，进行龙代还登记
+				//this.register();	//获取用户信息后，进行龙代还登记
+				this.$dialog.loading.close();
+				this.login = true;
 			}
 		},
 		getDate(){
@@ -220,15 +217,26 @@ export default {
 					endDate : _this.finishDate
 			　　}
 			}).then(res=>{
-				//console.log(res.data);
-				if(res.status==200){
+				console.log(res.data);
+				if(res.data.response_code==1){
 					_this.adopt = false;
 					_this.smallQuota = res.data.firstAmt;
 					_this.frequency = res.data.number;
 					_this.serviceCharge = res.data.fee;
+				}else {
+					_this.$dialog.toast({
+	                    mes: res.data.show_err,
+	                    timeout: 2000,
+	                    icon: 'error'
+	                });
 				}
 			}).catch(res=>{
-				console.log(res);
+				_this.$dialog.loading.close();
+				_this.$dialog.toast({
+                    mes: '请求接口超时',
+                    timeout: 2000,
+                    icon: 'error'
+                });
 			});
 		},
 		register(){
@@ -260,22 +268,14 @@ export default {
 	                });
 	                return;
 				}else {
-					_this.login = true;
+					_this.login = true;	//登录成功，显示页面内容
 				}
 			}).catch(res=>{
 				_this.$dialog.loading.close();
-				_this.$dialog.confirm({
-                    title: '温馨提醒',
-                    mes: '用户还没有登记,请退出重新登录',
-                    opts: [
-                        {
-                            txt: '确定',
-                            color: true,
-                            callback: () => {
-                                _this.register();
-                            }
-                        }
-                    ]
+				_this.$dialog.toast({
+                    mes: '请求接口超时',
+                    timeout: 5000,
+                    icon: 'error'
                 });
 			});
 		}

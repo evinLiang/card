@@ -78,7 +78,11 @@ export default {
 					console.log("请求出错");
 				}
 			}).catch(res=>{
-				console.log(res);
+				_this.$dialog.toast({
+                    mes: '请求接口超时',
+                    timeout: 2000,
+                    icon: 'error'
+                });
 			});
 		},
 		toApply(){

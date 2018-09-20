@@ -285,7 +285,7 @@ export default {
 			var _this = this;
 			_this.$axios.get(_this.api.server,{
 				params: {
-					act: _this.api.act.userOrderPlan,
+					act: _this.api.act.getPlan,
 					r_type: 1,
 					email: _this.userInfo.email,
 			　　		token: _this.userInfo.token,
@@ -293,6 +293,7 @@ export default {
 			　　}
 			}).then(res=>{
 				console.log(res.data);
+				return;
 				_this.$dialog.loading.close();
 				if(res.response_code==1){
 					_this.cards = res.data;
