@@ -79,9 +79,10 @@ export default {
 					realName : _this.name
 			　　}
 			}).then(res=>{
-				console.table(res.data);
+				//console.table(res.data);
+				this.$dialog.loading.close();
 				if(res.data.response_code == 1){
-					this.$dialog.loading.close();
+					
 					this.$dialog.toast({
 	                    mes: '实名认证成功',
 	                    timeout: 1500,
@@ -95,6 +96,12 @@ export default {
 					this.$router.push({ 
 						name: 'binding'
 					});
+				}else {
+					_this.$dialog.toast({
+	                    mes: res.data.show_err,
+	                    timeout: 2000,
+	                    icon: 'error'
+	                });
 				}
 			}).catch(res=>{
 				_this.$dialog.toast({
@@ -119,8 +126,7 @@ export default {
 				//console.table(res.data);
 				_this.$dialog.loading.close();
 				if(res.data.userAuth == 1){
-
-					_this.$dialog.loading.close();
+					
 					//实名认证，实名成功保存用户信息跳转绑卡页面、跳转到实名认证页面
 					sessionStorage.setItem('name',res.data.real_name);
 					sessionStorage.setItem('idNo',res.data.id_no);

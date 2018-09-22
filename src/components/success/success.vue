@@ -4,15 +4,15 @@
 		<div class="info">
 			<div class="item">
 				<p>代还金额</p>
-				<p>5000元</p>
+				<p>{{amount}}元</p>
 			</div>
 			<div class="item">
 				<p>打款次数</p>
-				<p>2次</p>
+				<p>{{pay_frequency}}次</p>
 			</div>
 			<div class="item c-ff7640">
 				<p><u>预计完成时间</u></p>
-				<p>2018-8-26</p>
+				<p>{{complete_time}}</p>
 			</div>
 		</div>
 		<button type="button" class="mt70 yd-btn-block yd-btn-theme" @click="toHome()"><span>确认</span></button>
@@ -26,7 +26,9 @@
 export default {
 	data() {
 		return {
-
+			amount: '',
+			pay_frequency: '',
+			complete_time: ''
 		};
 	},
 	methods:{
@@ -34,7 +36,21 @@ export default {
 			this.$router.push({ 
 				path: 'apply'
 			});
+		},
+		getOrder(){
+			if((this.$route.params.amount == undefined) || (this.$route.params.pay_frequency == undefined) || (this.$route.params.complete_time == undefined) ){
+				this.$router.push({ 
+					name: 'apply'
+				});
+			}else {
+				this.amount = this.$route.params.amount;
+				this.pay_frequency = this.$route.params.pay_frequency;
+				this.complete_time = this.$route.params.complete_time;
+			}
 		}
+	},
+	created(){
+		this.getOrder();
 	}
 }
 </script>

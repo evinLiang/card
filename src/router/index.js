@@ -9,6 +9,7 @@ import submit from '@/components/submit/submit'
 import cards from '@/components/cards/cards'
 import realName from '@/components/realName/realName'
 import plan from '@/components/plan/plan'
+import reservationPlan from '@/components/reservationPlan/reservationPlan'
 
 Vue.use(Router)
 
@@ -89,6 +90,14 @@ export default new Router({
       component: plan,
       meta: {
         title: '代偿计划'
+      }
+    },
+    {
+      path: '/reservationPlan',
+      name: 'reservationPlan',
+      component: reservationPlan,
+      meta: {
+        title: '查看预约计划'
       }
     }
   ]

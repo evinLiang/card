@@ -233,10 +233,10 @@ export default {
             　　}
             }).then(res=>{
                 console.table(res.data);
+                _this.$dialog.loading.close();
                 if(res.data.response_code==1){
                     // _this.card_id = res.data.card_id;
                     _this.start1 = true;
-                    _this.$dialog.loading.close();
                     _this.$dialog.toast({
                         mes: '已发送',
                         icon: 'success',
@@ -260,6 +260,7 @@ export default {
                     
                 }
             }).catch(res=>{
+                _this.$dialog.loading.close();
                 _this.$dialog.toast({
                     mes: '请求接口超时',
                     timeout: 2000,
@@ -283,9 +284,9 @@ export default {
             　　}
             }).then(res=>{
                 console.table(res);
+                _this.$dialog.loading.close();
                 if(res.data.response_code == 1){
                     _this.start1 = true;
-                    _this.$dialog.loading.close();
                     _this.$dialog.toast({
                         mes: '已发送',
                         icon: 'success',
@@ -300,6 +301,7 @@ export default {
                 }
 
             }).catch(res=>{
+                _this.$dialog.loading.close();
                 _this.$dialog.toast({
                     mes: '请求接口超时',
                     timeout: 2000,

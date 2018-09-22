@@ -2,8 +2,8 @@
 	<div class="record">
 		<div class="yRecord" v-show="listStatus==1">
 			<div class="record-tips">单日代偿笔数最晚在22:00之前完成</div>
-			<div class="record-list" v-for="(item, index) in recordList">
-				<div class="record-item">
+			<div class="record-list">
+				<div class="record-item" v-for="(item, index) in recordList" @click="plan(item.order_id)">
 					<div class="header">
 						<div class="bank">
 							<div class="icon">
@@ -19,7 +19,7 @@
 						<p><span class="name">服务费：</span>￥<span class="compAmount">{{item.compAmount}}</span></p>
 						<p><span class="name">申请时间：</span><span class="apply_date">{{item.apply_date}}</span></p>
 					</div>
-					<div class="suspend-btn" v-if="item.status == '处理中'" @click="suspend(item.order_id)">申请中止</div>
+					<div @click.stop class="suspend-btn" v-if="item.status == '处理中'" @click="suspend(item.order_id)">申请中止</div>
 				</div>
 			</div>
 		</div>
@@ -47,9 +47,27 @@ export default {
 	},
 	methods:{
 		suspend(id){
-			console.log(id);
+
+			//订单中止
+			//console.log("申请记录页的订单id:"+id);
 			this.$router.push({ 
 				name: 'suspend', 
+				params: { 
+					card_info: {
+						order_id: id,
+						card_logo: this.recordList[id].logo4,
+						bank_name: this.recordList[id].bankInfo.name,
+						card_num: this.recordList[id].bankInfo.card
+					} 
+				} 
+			});
+		},
+		plan(id){
+
+			//查看订单状态
+			//console.log("订单状态:"+id);
+			this.$router.push({ 
+				name: 'plan', 
 				params: { order_id: id } 
 			});
 		},
@@ -63,8 +81,8 @@ export default {
 			　　		token : _this.userInfo.token
 			　　}
 			}).then(res=>{
-				//console.log(res.data);
-				if(res.status==200){
+				//console.log(res);
+				if(res.status == 200){
 					if(res.data.response_code == 0){
 						_this.listStatus = 0;
 						_this.$dialog.loading.close();

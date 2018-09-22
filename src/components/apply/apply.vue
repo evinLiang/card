@@ -217,12 +217,19 @@ export default {
 					endDate : _this.finishDate
 			　　}
 			}).then(res=>{
-				console.log(res.data);
+				//console.dir("prePlan:"+res.data);
 				if(res.data.response_code==1){
-					_this.adopt = false;
+					
 					_this.smallQuota = res.data.firstAmt;
 					_this.frequency = res.data.number;
 					_this.serviceCharge = res.data.fee;
+
+					//查看是否需要龙登记
+					if(res.data.is_register == 0){
+						_this.register();
+					}else {
+						_this.adopt = false;
+					}
 				}else {
 					_this.$dialog.toast({
 	                    mes: res.data.show_err,
@@ -252,6 +259,7 @@ export default {
 			　　}
 			}).then(res=>{
 				_this.$dialog.loading.close();
+				console.table(res);
 				if(res.data.response_code !== 1){
 					this.$dialog.confirm({
 	                    title: '温馨提醒',
@@ -268,7 +276,9 @@ export default {
 	                });
 	                return;
 				}else {
-					_this.login = true;	//登录成功，显示页面内容
+					console.log('龙代还登记成功');
+					_this.adopt = false;
+					//_this.login = true;	//登录成功，显示页面内容
 				}
 			}).catch(res=>{
 				_this.$dialog.loading.close();
