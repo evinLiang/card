@@ -259,7 +259,7 @@ export default {
 			　　}
 			}).then(res=>{
 				_this.$dialog.loading.close();
-				console.table(res);
+				//console.table(res);
 				if(res.data.response_code !== 1){
 					this.$dialog.confirm({
 	                    title: '温馨提醒',

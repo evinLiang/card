@@ -110,9 +110,9 @@ export default {
                     cvv2: _this.CVV2
             　　}
             }).then(res=>{
-                console.table(res.data);
+                //console.table(res.data);
+                _this.$dialog.loading.close();
                 if(res.data.response_code==1){
-                    _this.$dialog.loading.close();
                     _this.$dialog.toast({
                         mes: '信用卡绑定成功',
                         icon: 'success',
@@ -141,6 +141,7 @@ export default {
                 }
 
             }).catch(res=>{
+                _this.$dialog.loading.close();
                 _this.$dialog.toast({
                     mes: '请求接口超时',
                     timeout: 2000,
@@ -232,7 +233,7 @@ export default {
                     cvv2: _this.CVV2
             　　}
             }).then(res=>{
-                console.table(res.data);
+                //console.table(res.data);
                 _this.$dialog.loading.close();
                 if(res.data.response_code==1){
                     // _this.card_id = res.data.card_id;
@@ -283,7 +284,7 @@ export default {
                     card_no: _this.confirmBankcard
             　　}
             }).then(res=>{
-                console.table(res);
+                //console.table(res);
                 _this.$dialog.loading.close();
                 if(res.data.response_code == 1){
                     _this.start1 = true;

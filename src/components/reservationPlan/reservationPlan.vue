@@ -84,7 +84,7 @@ export default {
                 order_id: _this.preOrderData.order_id
             　　}
             }).then(res=>{
-                console.log(res.data);
+                //console.log(res.data);
                 _this.$dialog.loading.close();
                 if(res.data.response_code == 1){
                     _this.planData = res.data.data;

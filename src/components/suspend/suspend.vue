@@ -80,7 +80,7 @@ export default {
 					order_id: _this.card_info.order_id
 			　　}
 			}).then(res=>{
-				//console.log(res.data);
+				console.log(res.data);
 				_this.$dialog.loading.close();
 				if(res.data.response_code == 1){
 					_this.status = 1;

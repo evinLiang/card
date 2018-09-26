@@ -65,7 +65,8 @@ export default {
 		plan(id){
 
 			//查看订单状态
-			//console.log("订单状态:"+id);
+			console.log("订单状态:"+id);
+			// return;
 			this.$router.push({ 
 				name: 'plan', 
 				params: { order_id: id } 
@@ -81,11 +82,12 @@ export default {
 			　　		token : _this.userInfo.token
 			　　}
 			}).then(res=>{
-				//console.log(res);
+				//console.log(res.data);
+				_this.$dialog.loading.close();
 				if(res.status == 200){
 					if(res.data.response_code == 0){
 						_this.listStatus = 0;
-						_this.$dialog.loading.close();
+						
 					}else {
 						_this.recordList = res.data.data;
 						_this.listStatus = 1;
@@ -93,9 +95,14 @@ export default {
 					}
 				
 				}else {
-					console.log("请求出错");
+					_this.$dialog.toast({
+	                    mes: '请求接口超时',
+	                    timeout: res.data.show_err,
+	                    icon: 'error'
+	                });
 				}
 			}).catch(res=>{
+				_this.$dialog.loading.close();
 				_this.$dialog.toast({
                     mes: '请求接口超时',
                     timeout: 2000,

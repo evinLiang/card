@@ -119,7 +119,7 @@ export default {
 		getOrder(){
 			if(this.$route.params.order_id == undefined){
 				this.$router.push({ 
-					name: 'apply'
+					name: 'record'
 				});
 			}else {
 				this.order_id = this.$route.params.order_id;

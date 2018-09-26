@@ -11,8 +11,11 @@
             </yd-cell-item>
             <yd-cell-item>
 	            <span slot="left">银行卡号：</span>
-	            <yd-input slot="right" required v-model="card" type="number" :show-required-icon="false" max="19" regex="/^([1-9]{1})(\d{14}|\d{18})$/" placeholder="请输入银行卡号"></yd-input>
+	            <yd-input slot="right" required v-model="card" type="number" :show-required-icon="false" max="19" regex="/^([1-9]{1})(\d{14}|\d{18})$/" placeholder="请输入您的借记卡号"></yd-input>
 	        </yd-cell-item>
+	        <yd-cell-item>
+                <span slot="left" class="cell-small-text c-ff7640">*借记卡作为您实名认证的标准，请勿输入信用卡号</span>
+            </yd-cell-item>
         </yd-cell-group>
         <div class="pd0-24">
        		<button type="button" class="mt70 yd-btn-block yd-btn-theme" @click="authentication"><span>提交认证</span></button>	
@@ -79,7 +82,7 @@ export default {
 					realName : _this.name
 			　　}
 			}).then(res=>{
-				//console.table(res.data);
+				console.table(res);
 				this.$dialog.loading.close();
 				if(res.data.response_code == 1){
 					

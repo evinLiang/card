@@ -1,6 +1,6 @@
 module.exports = {
-	server:'http://test3.mapi.xiaoshushidai.cn/mapi/index.php',
-	//server:document.location.origin+"/mapi/index.php",
+	server:'http://test3.mapi.xiaoshushidai.cn/mapi/index.php',		//本地开发测试地址
+	//server:document.location.origin+"/mapi/index.php",			//正式环境地址
 	act:{
 		register : "creditCardRegister",				//龙代还登记（注：apply组件请求“预览预约计划”接口根据返回的参数 is_register == 0 就需要请求这个接口进行龙登记注册）
 		prePlan : "creditCardPrePlan",					//预览预约计划（注：apply组件输入代偿金额请求的接口）

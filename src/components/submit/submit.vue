@@ -120,7 +120,6 @@ export default {
 
             //提交订单
             var _this = this;
-            _this.$dialog.loading.open('请求中...');
             if(_this.sendCode == ''){
                _this.$dialog.toast({
                     mes: '手机验证码不能为空',
@@ -135,6 +134,7 @@ export default {
                 });
                 return;
         	}
+            _this.$dialog.loading.open('请求中...');
             _this.$axios.get(_this.api.server,{
                 params: {
                 act: _this.api.act.order,
@@ -172,7 +172,7 @@ export default {
                     timeout: 2000,
                     icon: 'error'
                 });
-                _this.preOrder();
+                //_this.toSuccess();
             });
 
         },
@@ -191,7 +191,7 @@ export default {
                 card_id: _this.$store.state.card.card_id
             　　}
             }).then(res=>{
-                console.log(res.data);
+                //console.log(res.data);
                 _this.$dialog.loading.close();
                 if(res.data.response_code == 1){
                     _this.preOrderData = res.data;
@@ -228,7 +228,7 @@ export default {
         orderPlan(){
 
             //代偿计划（查看预约计划）
-            console.log(this.preOrderData.order_id);
+            //console.log(this.preOrderData.order_id);
             this.$router.push({ 
                 name: 'reservationPlan',
                 params: { 
